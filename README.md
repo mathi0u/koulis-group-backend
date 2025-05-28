@@ -58,6 +58,75 @@ $ npm run test:e2e
 $ npm run test:cov
 ```
 
+## Deploy to Railway
+
+This project is set up to be deployed on [Railway](https://railway.app/). You can deploy using the provided scripts or follow the manual process.
+
+### Quick Deployment
+
+We've included helper scripts to make Railway deployment easier:
+
+1. Add PostgreSQL to your Railway project through the Railway dashboard
+2. Configure environment variables:
+   ```bash
+   npm run setup:railway-postgres
+   ```
+   This script will extract database credentials from Railway and set them up as environment variables.
+
+3. Deploy with a single command:
+   ```bash
+   npm run deploy:railway
+   ```
+   This will build and deploy your application.
+
+### Manual Deployment
+
+If you prefer to manually deploy, follow these steps:
+
+1. Create an account on Railway and install the Railway CLI:
+   ```bash
+   npm i -g @railway/cli
+   ```
+
+2. Login to Railway:
+   ```bash
+   railway login
+   ```
+
+3. Initialize your project (from your project directory):
+   ```bash
+   railway init
+   ```
+
+4. Link your project to an existing Railway project:
+   ```bash
+   railway link
+   ```
+
+5. Add a PostgreSQL plugin to your project through the Railway dashboard
+
+6. Set up your environment variables in the Railway dashboard or through the CLI:
+   ```bash
+   railway variables set POSTGRESQL_HOST=your-postgres-host
+   railway variables set POSTGRESQL_PORT=5432
+   railway variables set POSTGRESQL_USER=your-postgres-user
+   railway variables set POSTGRESQL_PASSWORD=your-postgres-password
+   railway variables set POSTGRESQL_DB=your-postgres-db
+   railway variables set JWT_SECRET=your-secret-key
+   ```
+
+7. Deploy your code:
+   ```bash
+   railway up
+   ```
+
+8. Open your project in the browser:
+   ```bash
+   railway open
+   ```
+
+Once deployed, you can access the Swagger API documentation at `YOUR_RAILWAY_URL/swagger`
+
 ## Support
 
 Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).

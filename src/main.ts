@@ -10,8 +10,13 @@ declare const module: any
 async function bootstrap() {
     const app = await NestFactory.create<NestFastifyApplication>(AppModule)
 
+    const corsOrigins = ['http://localhost:4200']
+    if (process.env.RAILWAY_STATIC_URL) {
+        corsOrigins.push(process.env.RAILWAY_STATIC_URL)
+    }
+
     app.enableCors({
-        origin: ['http://localhost:4200'],
+        origin: corsOrigins,
         methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
         credentials: true,
     })
@@ -33,14 +38,20 @@ async function bootstrap() {
     const document = SwaggerModule.createDocument(app, config)
     SwaggerModule.setup('swagger', app, document)
 
-    await app.listen(process.env.PORT ?? 8080, process.env.ADDRESS ?? 'localhost')
+    // For Railway deployment, we want to listen on 0.0.0.0 to accept connections on all network interfaces
+    const port = process.env.PORT || 8080
+    const host = '0.0.0.0'
+    
+    await app.listen(port, host)
 
     if (module.hot) {
         module.hot.accept()
         module.hot.dispose(() => app.close())
     }
-
-    console.log(`\nUse swagger to learn how to use the API: ${await app.getUrl()}/swagger`)
+    
+    const appUrl = await app.getUrl()
+    console.log(`\nApplication running on: ${appUrl}`)
+    console.log(`Use swagger to learn how to use the API: ${appUrl}/swagger`)
 }
 
 bootstrap()
