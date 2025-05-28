@@ -1,36 +1,14 @@
-# Multi-stage build for optimized production image
-FROM node:20-alpine AS base
+# Multi-stage build for optimization
+FROM node:20-alpine AS builder
 
 # Set working directory
 WORKDIR /app
 
-# Install dumb-init for proper signal handling
-RUN apk add --no-cache dumb-init
-
-# Create non-root user for security
-RUN addgroup -g 1001 -S nodejs && adduser -S nestjs -u 1001
-
-# =====================================
-# Dependencies stage
-# =====================================
-FROM base AS deps
-
 # Copy package files
 COPY package*.json ./
 
-# Install dependencies with npm ci for faster, reliable builds
-RUN npm ci --only=production && npm cache clean --force
-
-# =====================================
-# Build stage
-# =====================================
-FROM base AS build
-
-# Copy package files
-COPY package*.json ./
-
-# Install all dependencies (including dev dependencies for building)
-RUN npm ci
+# Install dependencies (including devDependencies for build)
+RUN npm ci --only=production=false
 
 # Copy source code
 COPY . .
@@ -38,26 +16,26 @@ COPY . .
 # Build the application
 RUN npm run build
 
-# =====================================
+# Remove devDependencies to reduce image size
+RUN npm prune --production
+
 # Production stage
-# =====================================
-FROM base AS production
+FROM node:20-alpine AS production
 
-# Set NODE_ENV to production
-ENV NODE_ENV=production
+# Install dumb-init for proper signal handling
+RUN apk add --no-cache dumb-init
 
-# Set default port and address for container
-ENV PORT=8080
-ENV ADDRESS=0.0.0.0
+# Create non-root user for security
+RUN addgroup -g 1001 -S nodejs && \
+    adduser -S nestjs -u 1001
 
-# Copy production dependencies from deps stage
-COPY --from=deps --chown=nestjs:nodejs /app/node_modules ./node_modules
+# Set working directory
+WORKDIR /app
 
-# Copy built application from build stage
-COPY --from=build --chown=nestjs:nodejs /app/dist ./dist
-
-# Copy package.json for running the app
-COPY --chown=nestjs:nodejs package*.json ./
+# Copy built application and production dependencies from builder stage
+COPY --from=builder --chown=nestjs:nodejs /app/dist ./dist
+COPY --from=builder --chown=nestjs:nodejs /app/node_modules ./node_modules
+COPY --from=builder --chown=nestjs:nodejs /app/package.json ./package.json
 
 # Switch to non-root user
 USER nestjs
@@ -65,12 +43,12 @@ USER nestjs
 # Expose port
 EXPOSE 8080
 
-# Health check using the existing health endpoint
-HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
-    CMD node -e "require('http').get('http://localhost:8080/api/health', (res) => { process.exit(res.statusCode === 200 ? 0 : 1) })" || exit 1
+# Health check
+HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
+    CMD node dist/main.js --health-check || exit 1
 
-# Use dumb-init for proper signal handling
+# Use dumb-init to handle signals properly
 ENTRYPOINT ["dumb-init", "--"]
 
 # Start the application
-CMD ["npm", "run", "start:prod"]
+CMD ["node", "dist/main.js"]
