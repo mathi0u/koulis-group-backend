@@ -11,23 +11,23 @@ async function bootstrap() {
     const app = await NestFactory.create<NestFastifyApplication>(AppModule)
 
     // Configure CORS to allow connections from frontend
-    const corsOrigins = ['http://localhost:4200']
-    
+    const corsOrigins = ['http://localhost:4200', 'https://koulis-group-frontend-production.up.railway.app']
+
     // Add Railway deployments URLs
     if (process.env.RAILWAY_STATIC_URL) {
         corsOrigins.push(process.env.RAILWAY_STATIC_URL)
     }
-    
+
     // Add custom frontend URL if specified
     if (process.env.FRONTEND_URL) {
         corsOrigins.push(process.env.FRONTEND_URL)
     }
-    
+
     // Remove any undefined/empty values
     const allowedOrigins = corsOrigins.filter(Boolean)
-    
+
     console.log('CORS origins:', allowedOrigins)
-    
+
     app.enableCors({
         origin: allowedOrigins,
         methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
@@ -54,14 +54,14 @@ async function bootstrap() {
     // For Railway deployment, we want to listen on 0.0.0.0 to accept connections on all network interfaces
     const port = process.env.PORT || 8080
     const host = '0.0.0.0'
-    
+
     await app.listen(port, host)
 
     if (module.hot) {
         module.hot.accept()
         module.hot.dispose(() => app.close())
     }
-    
+
     const appUrl = await app.getUrl()
     console.log(`\nApplication running on: ${appUrl}`)
     console.log(`Use swagger to learn how to use the API: ${appUrl}/swagger`)
