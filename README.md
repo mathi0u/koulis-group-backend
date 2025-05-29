@@ -60,72 +60,144 @@ $ npm run test:cov
 
 ## Deploy to Railway
 
-This project is set up to be deployed on [Railway](https://railway.app/). You can deploy using the provided scripts or follow the manual process.
+This project is set up to be deployed on [Railway](https://railway.app/). This K-Group backend application includes multiple modules (accounting, clients, subscriptions, etc.) and requires a PostgreSQL database.
+
+For a comprehensive, step-by-step deployment guide, see [RAILWAY_DEPLOYMENT.md](RAILWAY_DEPLOYMENT.md).
 
 ### Quick Deployment
 
 We've included helper scripts to make Railway deployment easier:
 
-1. Add PostgreSQL to your Railway project through the Railway dashboard
-2. Configure environment variables:
+1. **Create a Railway project**:
+   - Sign up or log in to [Railway](https://railway.app/)
+   - Create a new project 
+   - Add a PostgreSQL database plugin
+
+2. **Configure environment variables**:
    ```bash
    npm run setup:railway-postgres
    ```
-   This script will extract database credentials from Railway and set them up as environment variables.
+   This script will:
+   - Extract database credentials from Railway's PostgreSQL plugin
+   - Set up all necessary environment variables
+   - Generate a secure JWT secret
 
-3. Deploy with a single command:
+3. **Deploy with a single command**:
    ```bash
    npm run deploy:railway
    ```
-   This will build and deploy your application.
+   This will:
+   - Check for required environment variables
+   - Build the application
+   - Deploy it to Railway
+
+4. **Verify database setup** (if you encounter database issues):
+   ```bash
+   npm run verify:railway-db
+   ```
+   This script will:
+   - Check if all required tables exist
+   - Help troubleshoot database initialization issues
+   - Provide options to force table recreation if needed
 
 ### Manual Deployment
 
 If you prefer to manually deploy, follow these steps:
 
-1. Create an account on Railway and install the Railway CLI:
+1. **Create a Railway account and install the CLI**:
    ```bash
    npm i -g @railway/cli
    ```
 
-2. Login to Railway:
+2. **Login to Railway**:
    ```bash
    railway login
    ```
 
-3. Initialize your project (from your project directory):
+3. **Initialize your project**:
    ```bash
    railway init
    ```
 
-4. Link your project to an existing Railway project:
+4. **Link your project to an existing Railway project**:
    ```bash
    railway link
    ```
 
-5. Add a PostgreSQL plugin to your project through the Railway dashboard
+5. **Add a PostgreSQL plugin** to your project through the Railway dashboard
 
-6. Set up your environment variables in the Railway dashboard or through the CLI:
+6. **Set up your environment variables** in the Railway dashboard or through the CLI:
    ```bash
+   # Database settings
    railway variables set POSTGRESQL_HOST=your-postgres-host
    railway variables set POSTGRESQL_PORT=5432
    railway variables set POSTGRESQL_USER=your-postgres-user
    railway variables set POSTGRESQL_PASSWORD=your-postgres-password
    railway variables set POSTGRESQL_DB=your-postgres-db
+   railway variables set POSTGRESQL_SSL=true
+   railway variables set SYNC=true
+   
+   # Authentication 
    railway variables set JWT_SECRET=your-secret-key
+   
+   # Runtime settings
+   railway variables set NODE_ENV=production
+   
+   # Frontend settings (replace with your frontend URL)
+   railway variables set FRONTEND_URL=https://your-frontend-url.com
    ```
 
-7. Deploy your code:
+7. **Build and deploy your code**:
    ```bash
+   npm run build
    railway up
    ```
 
-8. Open your project in the browser:
+8. **Open your project** in the browser:
    ```bash
    railway open
    ```
 
-Once deployed, you can access the Swagger API documentation at `YOUR_RAILWAY_URL/swagger`
+Once deployed, you can access:
+- The Swagger API documentation at `YOUR_RAILWAY_URL/swagger`
+- The health check endpoint at `YOUR_RAILWAY_URL/api/health`
+
+### Troubleshooting Railway Deployment
+
+If you encounter any issues with your K-Group application deployment, check the following:
+
+1. **Verify health check endpoint**
+   - The health check is configured to check `/api/health`
+   - Make sure this endpoint returns a 200 status code
+   - Use Railway logs to see if it's being reached
+
+2. **Check Railway logs**
+   - Railway dashboard provides logs that show startup errors
+   - Look for database connection issues or TypeORM entity errors
+   - Check for synchronization messages indicating table creation
+
+3. **Environment variables**
+   - Ensure all required environment variables are set in Railway
+   - Database connection variables must match your PostgreSQL service
+   - Verify SSL is enabled for database connections (POSTGRESQL_SSL=true)
+   - Make sure SYNC=true to allow entity creation
+
+4. **Database tables**
+   - Check if all required tables are created:
+     - client, subscription, program, service, accounting, payment tables
+   - If tables are missing, try toggling SYNC to false then true again
+
+5. **Entity relationships**
+   - Many modules depend on relationships between entities
+   - If you see foreign key errors, check entity definitions
+   - You may need to manually create relationships if automatic sync fails
+
+6. **Frontend connection**
+   - If your frontend can't connect, verify CORS settings
+   - Make sure FRONTEND_URL is set to your frontend's domain
+   - Check for SSL/HTTPS issues in browser console
+
+For more detailed troubleshooting steps, refer to the [Railway Troubleshooting Guide](RAILWAY_TROUBLESHOOTING.md) in this repository.
 
 ## Support
 
