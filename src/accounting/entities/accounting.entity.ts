@@ -12,7 +12,7 @@ export class Accounting {
     @PrimaryGeneratedColumn()
     transaction_id: number
 
-    @ManyToOne(() => Payment, { nullable: false })
+    @ManyToOne(() => Payment, { nullable: true })
     @JoinColumn({ name: 'paymentPaymentId' })
     payment: Payment
 

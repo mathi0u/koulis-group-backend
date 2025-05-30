@@ -113,7 +113,7 @@ export class SucribtionsService {
         accounting.type = AccountingType.INCOME
         accounting.amount = payment.amount
         accounting.payment = payment
-        accounting.description = `Payment for subscription #${savedSubscription.subscription_id}`
+        accounting.description = `Paiement pour l'abonnement #${savedSubscription.subscription_id}`
 
         await this.accountingRepository.save(accounting)
 

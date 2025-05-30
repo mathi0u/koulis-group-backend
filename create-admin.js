@@ -1,4 +1,3 @@
-// Simple script to create an initial admin user
 const { Client } = require('pg')
 const bcrypt = require('bcrypt')
 

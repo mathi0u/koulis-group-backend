@@ -1,6 +1,8 @@
-import { IsEnum, IsNumber, IsOptional, IsString } from 'class-validator'
+import { IsEnum, IsNumber, IsOptional, IsString, ValidateNested } from 'class-validator'
 import { ApiProperty } from '@nestjs/swagger'
+import { Type } from 'class-transformer'
 import { AccountingType } from '../entities/accounting.entity'
+import { PaymentInfoDto } from './payment-info.dto'
 
 export class CreateAccountingDto {
     @ApiProperty({ enum: AccountingType })
@@ -16,7 +18,8 @@ export class CreateAccountingDto {
     @IsOptional()
     description?: string
 
-    @ApiProperty()
-    @IsNumber()
-    payment_id: number
+    @ApiProperty({ type: () => PaymentInfoDto })
+    @ValidateNested()
+    @Type(() => PaymentInfoDto)
+    payment: PaymentInfoDto
 }
