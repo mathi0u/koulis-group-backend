@@ -1,7 +1,7 @@
 import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common'
 import { ClientsService } from './clients.service'
-
-import { Client } from './entities/client.entity'
+import { CreateClientDto } from './dto/create-client.dto'
+import { UpdateClientDto } from './dto/update-client.dto'
 import { ApiBody, ApiOperation } from '@nestjs/swagger'
 
 @Controller('clients')
@@ -9,9 +9,9 @@ export class ClientsController {
     constructor(private readonly clientsService: ClientsService) {}
 
     @Post()
-    @ApiBody({ type: Client, required: true })
+    @ApiBody({ type: CreateClientDto, required: true })
     @ApiOperation({ summary: 'Create client' })
-    create(@Body() createClientDto: Client) {
+    create(@Body() createClientDto: CreateClientDto) {
         return this.clientsService.create(createClientDto)
     }
 
@@ -26,7 +26,7 @@ export class ClientsController {
     }
 
     @Patch(':id')
-    update(@Param('id') id: string, @Body() updateClientDto: Client) {
+    update(@Param('id') id: string, @Body() updateClientDto: UpdateClientDto) {
         return this.clientsService.update(+id, updateClientDto)
     }
 

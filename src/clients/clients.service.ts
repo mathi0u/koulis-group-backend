@@ -3,7 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm'
 import { Client } from './entities/client.entity'
 import { Repository } from 'typeorm'
 import { CreateClientDto } from './dto/create-client.dto'
-import { last } from 'rxjs'
+import { UpdateClientDto } from './dto/update-client.dto'
 
 @Injectable()
 export class ClientsService {
@@ -30,6 +30,9 @@ export class ClientsService {
                     end_date: true,
                     program_level: true,
                 },
+            },
+            order: {
+                updated_at: 'DESC',
             },
         })
 
@@ -64,7 +67,7 @@ export class ClientsService {
         return client
     }
 
-    update(id: number, updateClientDto: Client) {
+    update(id: number, updateClientDto: UpdateClientDto) {
         return this.client_repository.update(
             {
                 client_id: id,
