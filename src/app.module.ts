@@ -11,11 +11,13 @@ import { AccountingModule } from './accounting/accounting.module'
 import { ServicesModule } from './services/services.module'
 import { ProgramsModule } from './programs/programs.module'
 import { InventoryModule } from './inventory/inventory.module'
+import { AuthModule } from './auth/auth.module'
 
 @Module({
     imports: [
         ConfigsModule,
         UsersModule,
+        AuthModule,
         HealthModule,
         TypeOrmModule.forFeature([]),
         SucribtionsModule,
