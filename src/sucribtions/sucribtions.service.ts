@@ -123,7 +123,7 @@ export class SucribtionsService {
     async findAll() {
         return await this.subscriptionRepository.find({
             relations: ['client', 'program', 'payments'],
-            order: { start_date: 'DESC' },
+            order: { end_date: 'DESC' },
         })
     }
 
